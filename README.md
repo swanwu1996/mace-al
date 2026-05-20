@@ -66,3 +66,11 @@ bash scripts/run_mace_al.sh --root test_representative init-representative-demo
 bash scripts/run_mace_al.sh run test_representative/param.json test_representative/machine.json
 bash scripts/run_mace_al.sh run-report test_representative/param.json test_representative/machine.json -v
 ```
+
+Full representative BaFeF4 loop with direct VASP and next-generation model export:
+
+```bash
+bash scripts/run_mace_al.sh --root test_representative_full init-representative-demo --train-count 20 --test-count 4 --seed-count 2
+bash scripts/run_mace_al.sh run test_representative_full/param.json test_representative_full/machine.json
+bash scripts/run_mace_al.sh run-report test_representative_full/param.json test_representative_full/machine.json -v
+```

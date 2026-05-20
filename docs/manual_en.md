@@ -222,3 +222,14 @@ bash scripts/run_mace_al.sh run test_representative/param.json test_representati
 
 By default it stops after VASP input preparation to avoid expensive DFT jobs. Set
 `submit_dft=true` or `run_dft_direct=true` if you want to label those structures.
+
+`test_representative_full` is the full local BaFeF4 loop used to validate the workflow:
+
+```bash
+bash scripts/run_mace_al.sh --root test_representative_full init-representative-demo --train-count 20 --test-count 4 --seed-count 2
+bash scripts/run_mace_al.sh run test_representative_full/param.json test_representative_full/machine.json
+bash scripts/run_mace_al.sh run-report test_representative_full/param.json test_representative_full/machine.json -v
+```
+
+It performs MACE/CUDA exploration, direct VASP labeling, label collection, next-generation
+MACE fine-tuning, plot generation, and final model export.

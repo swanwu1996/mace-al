@@ -220,3 +220,14 @@ bash scripts/run_mace_al.sh run test_representative/param.json test_representati
 
 默认配置停在 VASP 输入准备后，避免直接启动较重的 DFT。需要标记时，把 `submit_dft=true`
 或 `run_dft_direct=true` 打开。
+
+`test_representative_full` 是已经用于验证工作流的完整 BaFeF4 本地闭环：
+
+```bash
+bash scripts/run_mace_al.sh --root test_representative_full init-representative-demo --train-count 20 --test-count 4 --seed-count 2
+bash scripts/run_mace_al.sh run test_representative_full/param.json test_representative_full/machine.json
+bash scripts/run_mace_al.sh run-report test_representative_full/param.json test_representative_full/machine.json -v
+```
+
+它会完整执行 MACE/CUDA 探索、直接运行 VASP 标记、收集标签、训练下一代 MACE、
+生成图像并导出最终模型。
