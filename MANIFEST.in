@@ -1,0 +1,8 @@
+include README.md
+include LICENSE
+include job.yaml
+include param.json
+include machine.json
+recursive-include docs *.md
+recursive-include scripts *.py *.sh
+recursive-include templates *

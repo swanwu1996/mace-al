@@ -1,0 +1,20 @@
+{
+  "mace": {
+    "env_script": "module load anaconda && conda activate mace",
+    "device": "cuda"
+  },
+  "explore": {
+    "device": "cuda"
+  },
+  "dft": {
+    "potcar_root": "/home/qhwu/PBE64",
+    "use_genque": true,
+    "genque_choice": "2",
+    "slurm_script": "2-vasp_gpu.sh",
+    "submit_command": "sbatch 2-vasp_gpu.sh",
+    "done_file": "vasprun.xml",
+    "poll_seconds": 300,
+    "max_wait_seconds": 604800
+  }
+}
+

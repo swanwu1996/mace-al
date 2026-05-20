@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mace-al"
+version = "0.1.0"
+description = "Generation-based active learning workflow for MACE, ASE, and VASP"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.9"
+dependencies = [
+  "ase",
+  "numpy",
+  "PyYAML",
+]
+
+[project.scripts]
+maceal = "mace_al.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/qhwu/mace-al"
+Issues = "https://github.com/qhwu/mace-al/issues"
+
+[tool.setuptools]
+packages = ["mace_al"]

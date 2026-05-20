@@ -1,0 +1,17 @@
+scripts/__pycache__/
+__pycache__/
+mace_al/__pycache__/
+work/
+cache/
+models/iter_*/
+data/*.extxyz
+test_*/cache/
+test_*/final_models/
+test_*/data/*.extxyz
+templates/vasp/POTCAR
+templates/vasp/POTCAR.spec
+*.log
+slurm-*.out
+*.egg-info/
+dist/
+build/
