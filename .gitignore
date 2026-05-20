@@ -8,6 +8,7 @@ data/*.extxyz
 test_*/cache/
 test_*/final_models/
 test_*/data/*.extxyz
+!test_hfo2_production/data/seeds.extxyz
 templates/vasp/POTCAR
 templates/vasp/POTCAR.spec
 *.log

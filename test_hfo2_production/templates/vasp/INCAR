@@ -1,0 +1,17 @@
+SYSTEM = mace_al_hfo2_production
+ENCUT = 600
+EDIFF = 1E-6
+NELM = 240
+NSW = 0
+IBRION = -1
+ISMEAR = 0
+SIGMA = 0.05
+LWAVE = .FALSE.
+LCHARG = .FALSE.
+PREC = Accurate
+ALGO = All
+LREAL = .FALSE.
+LASPH = .TRUE.
+ADDGRID = .TRUE.
+ISYM = 0
+

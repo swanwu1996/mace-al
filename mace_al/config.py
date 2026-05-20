@@ -154,6 +154,7 @@ def default_config() -> dict[str, Any]:
             "poll_seconds": 300,
             "max_wait_seconds": 604800,
             "force_limit": 20.0,
+            "require_ediff_reached": True,
         },
         "run": {
             "max_generations": 3,

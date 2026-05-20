@@ -11,7 +11,7 @@ English manual: [docs/manual_en.md](docs/manual_en.md).
 ## Quick Start
 
 ```bash
-git clone https://github.com/qhwu/mace-al.git
+git clone https://github.com/swanwu1996/mace-al.git
 cd mace-al
 
 # Optional demo data
@@ -70,3 +70,16 @@ bash scripts/run_mace_al.sh run-report test_representative_full/param.json test_
 MACE-AL checks VASP electronic convergence before collecting labels. Jobs with
 messages such as `EDIFF was not reached` or `electronic self-consistency was not
 achieved` are written to `failed_jobs.txt` and skipped.
+
+Production HfO2 validation demo:
+
+```bash
+bash scripts/run_mace_al.sh run test_hfo2_production/param.json test_hfo2_production/machine.json
+bash scripts/run_mace_al.sh run-report test_hfo2_production/param.json test_hfo2_production/machine.json -v
+```
+
+The HfO2 demo uses a 12-atom Pca21 seed, two pretrained MACE foundation models,
+16 explored candidates, 8 selected VASP labels, and strict VASP settings
+(`ENCUT=600`, `EDIFF=1E-6`, `NELM=240`, `ALGO=All`, `2x2x2` k-mesh). The
+validated local run produced 8 converged labels, 0 failed DFT jobs, diagnostic
+plots, and two Generation-1 exported models.

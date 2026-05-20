@@ -200,7 +200,7 @@ bash scripts/run_mace_al.sh run-report param.json machine.json -v
 
 ## 10. 测试和代表性示例
 
-仓库保留两个示例配置：
+仓库保留三个示例配置：
 
 ```bash
 bash scripts/run_mace_al.sh run test_smoke/param.json test_smoke/machine.json
@@ -222,3 +222,16 @@ bash scripts/run_mace_al.sh run-report test_representative_full/param.json test_
 MACE-AL 会在收集标签前检查 VASP 电子自洽是否收敛。出现 `EDIFF was not reached`
 或 `electronic self-consistency was not achieved` 的作业会写入 `failed_jobs.txt`，
 不会进入训练集。
+
+`test_hfo2_production` 是更重的生产级 HfO2 验证示例：
+
+```bash
+bash scripts/run_mace_al.sh run test_hfo2_production/param.json test_hfo2_production/machine.json
+bash scripts/run_mace_al.sh run-report test_hfo2_production/param.json test_hfo2_production/machine.json -v
+```
+
+这个示例从 12 原子 Pca21 HfO2 seed 和 MPA/OMAT 两个 MACE foundation model
+出发，探索 16 个候选结构，选择 8 个结构进入 VASP，只有检测到 `ediff is reached`
+标记后才收集标签，并导出两个 Generation-1 模型。VASP 模板使用更严格的设置：
+`ENCUT=600`、`EDIFF=1E-6`、`NELM=240`、`ALGO=All`、`LASPH=.TRUE.`、
+`LREAL=.FALSE.` 和 `2x2x2` Gamma-centered k 点。

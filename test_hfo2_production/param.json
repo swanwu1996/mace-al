@@ -2,22 +2,21 @@
   "version": "0.1.0",
   "work_path": "./cache",
   "project": {
-    "name": "mace_active_learning",
+    "name": "mace_al_hfo2_production",
     "seed_file": "./data/seeds.extxyz",
     "train_file": "./data/train.extxyz",
     "test_file": "./data/test.extxyz",
     "foundation_model": "/home/qhwu/mace_mod/mace-omat-0-medium.model",
     "foundation_models": [
-      "/home/qhwu/mace_mod/mace-mh-1.model",
       "/home/qhwu/mace_mod/mace-mpa-0-medium.model",
       "/home/qhwu/mace_mod/mace-omat-0-medium.model"
     ]
   },
   "mace": {
-    "seeds": [1, 2, 3, 4],
-    "max_num_epochs": 50,
-    "batch_size": 2,
-    "valid_batch_size": 2,
+    "seeds": [1],
+    "max_num_epochs": 2,
+    "batch_size": 1,
+    "valid_batch_size": 1,
     "lr": 0.0001,
     "energy_key": "REF_energy",
     "forces_key": "REF_forces",
@@ -30,41 +29,41 @@
   },
   "explore": {
     "model_glob": "cache/Generation-{generation}/mace/committee/*.model",
-    "md_steps": 2000,
+    "md_steps": 2,
     "timestep_fs": 0.5,
     "temperature": [300, 600, 900],
-    "sample_interval": 20,
+    "sample_interval": 1,
     "friction_fs": 100.0,
-    "force_std_low": 0.08,
-    "force_std_high": 0.35,
-    "energy_std_per_atom_high": 0.02,
-    "max_candidates": 200,
-    "min_frame_gap": 10
+    "force_std_low": 0.0,
+    "force_std_high": 100.0,
+    "energy_std_per_atom_high": 100.0,
+    "max_candidates": 16,
+    "min_frame_gap": 1
   },
   "select": {
-    "max_selected": 50,
-    "min_distance": 0.01,
+    "max_selected": 8,
+    "min_distance": 0.0,
     "descriptor": "mace_uncertainty"
   },
   "dft": {
-    "job": 10,
+    "job": 1,
     "template_dir": "./templates/vasp",
     "potcar_map": {
-      "Ba": "Ba_sv",
-      "Fe": "Fe",
-      "F": "F"
+      "Hf": "Hf_pv",
+      "O": "O"
     },
     "force_limit": 20.0,
     "require_ediff_reached": true
   },
   "run": {
-    "max_generations": 3,
+    "max_generations": 2,
     "auto_init_committee": true,
-    "submit_dft": true,
-    "run_dft_direct": false,
+    "run_dft_direct": true,
+    "submit_dft": false,
     "wait_dft": true,
     "train_next_generation": true,
-    "stop_after_train_next": false,
-    "final_model_count": 4
+    "stop_after_train_next": true,
+    "final_model_count": 2
   }
 }
+

@@ -53,7 +53,8 @@
       "Fe": "Fe",
       "F": "F"
     },
-    "force_limit": 20.0
+    "force_limit": 20.0,
+    "require_ediff_reached": true
   },
   "run": {
     "max_generations": 2,
@@ -66,4 +67,3 @@
     "final_model_count": 2
   }
 }
-

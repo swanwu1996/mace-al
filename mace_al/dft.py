@@ -84,7 +84,7 @@ def submit_vasp(cfg: dict, layout: Layout) -> None:
         marker.write_text(time.strftime("%Y-%m-%d %H:%M:%S") + "\n", encoding="utf-8")
 
 
-def vasp_converged(job_dir: Path) -> tuple[bool, str]:
+def vasp_converged(job_dir: Path, require_ediff_reached: bool = True) -> tuple[bool, str]:
     outcar = job_dir / "OUTCAR"
     vasp_out = job_dir / "vasp.out"
     text = ""
@@ -104,6 +104,8 @@ def vasp_converged(job_dir: Path) -> tuple[bool, str]:
             return False, marker
     if not outcar.exists():
         return False, "missing OUTCAR"
+    if require_ediff_reached and "ediff is reached" not in lower:
+        return False, "missing EDIFF reached marker"
     return True, "ok"
 
 
@@ -141,7 +143,10 @@ def collect_vasp(cfg: dict, layout: Layout) -> Path:
     failed = []
     for job_dir in sorted(p for p in layout.stage("dft").glob("cand_*") if p.is_dir()):
         try:
-            ok, reason = vasp_converged(job_dir)
+            ok, reason = vasp_converged(
+                job_dir,
+                require_ediff_reached=cfg["dft"].get("require_ediff_reached", True),
+            )
             if not ok:
                 failed.append((job_dir, reason))
                 print(f"Skip unconverged VASP job {job_dir}: {reason}", flush=True)

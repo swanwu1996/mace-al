@@ -1,0 +1,18 @@
+{
+  "mace": {
+    "env_script": "module load anaconda && conda activate mace",
+    "device": "cuda"
+  },
+  "explore": {
+    "device": "cuda"
+  },
+  "dft": {
+    "potcar_root": "/home/qhwu/PBE64",
+    "use_genque": false,
+    "done_file": "vasprun.xml",
+    "poll_seconds": 10,
+    "max_wait_seconds": 7200,
+    "direct_command": "module purge && module load vasp-gpu && export OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 && mpirun -np 1 vasp_std > vasp.out 2>&1"
+  }
+}
+

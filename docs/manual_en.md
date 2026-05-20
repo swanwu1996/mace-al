@@ -201,7 +201,7 @@ bash scripts/run_mace_al.sh run-report param.json machine.json -v
 
 ## 10. Smoke and Representative Tests
 
-Two development examples are included:
+Three development examples are included:
 
 ```bash
 bash scripts/run_mace_al.sh run test_smoke/param.json test_smoke/machine.json
@@ -223,3 +223,16 @@ MACE fine-tuning, plot generation, and final model export.
 MACE-AL checks VASP electronic convergence before collecting labels. Jobs with
 `EDIFF was not reached` or `electronic self-consistency was not achieved` are
 written to `failed_jobs.txt` and skipped.
+
+`test_hfo2_production` is a heavier production-style HfO2 validation case:
+
+```bash
+bash scripts/run_mace_al.sh run test_hfo2_production/param.json test_hfo2_production/machine.json
+bash scripts/run_mace_al.sh run-report test_hfo2_production/param.json test_hfo2_production/machine.json -v
+```
+
+It starts from a 12-atom Pca21 HfO2 seed and the MPA/OMAT MACE foundation
+models, explores 16 candidates, selects 8 structures for VASP, requires the
+`ediff is reached` marker before collecting labels, and exports two Generation-1
+models. The included VASP template uses `ENCUT=600`, `EDIFF=1E-6`, `NELM=240`,
+`ALGO=All`, `LASPH=.TRUE.`, `LREAL=.FALSE.`, and a `2x2x2` Gamma-centered mesh.
