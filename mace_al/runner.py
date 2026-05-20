@@ -10,6 +10,7 @@ from .explore import run_explore
 from .io import read_atoms
 from .mace import init_committee_from_foundations, train_committee
 from .paths import Layout
+from .plotting import plot_generation_summary, plot_selection, plot_training
 from .select import run_select
 
 
@@ -67,6 +68,7 @@ def run_automatic(cfg: dict, root: str | Path, start: int = 0, stop: int | None 
         if not is_done(layout, "select"):
             stage_log(layout, "selecting DFT candidates")
             selected = run_select(cfg, layout)
+            plot_selection(layout)
             mark_done(layout, "select", {"selected": len(read_atoms(selected))})
 
         selected_count = len(read_atoms(layout.stage("select") / "selected.xyz"))
@@ -107,6 +109,7 @@ def run_automatic(cfg: dict, root: str | Path, start: int = 0, stop: int | None 
                 if not is_done(layout, "train_next") and not has_committee(next_layout):
                     stage_log(layout, f"training Generation-{generation + 1} committee")
                     train_committee(cfg, next_layout)
+                    plot_training(next_layout)
                     mark_done(layout, "train_next", {"next_generation": generation + 1})
                 if cfg.get("run", {}).get("stop_after_train_next", False):
                     break
@@ -119,6 +122,7 @@ def run_automatic(cfg: dict, root: str | Path, start: int = 0, stop: int | None 
             break
 
     if completed:
+        plot_generation_summary(cfg, root)
         export_final_models(cfg, root)
 
 

@@ -185,7 +185,21 @@ final_models/
 
 `manifest.json` records the final generation and exported files.
 
-## 9. Smoke Tests
+## 9. Plots
+
+MACE-AL automatically generates diagnostic plots:
+
+- `cache/Generation-N/select/selection_map.png`: committee uncertainty map; selected structures are highlighted.
+- `cache/Generation-N/mace/committee/training_metrics.png`: validation energy/force metrics from MACE training logs.
+- `cache/plots/generation_summary.png`: candidates, selected structures, and DFT labels by generation.
+
+You can regenerate plots at any time:
+
+```bash
+bash scripts/run_mace_al.sh run-report param.json machine.json -v
+```
+
+## 10. Smoke and Representative Tests
 
 Small development tests are included:
 
@@ -198,3 +212,13 @@ bash scripts/run_mace_al.sh run test_full/param.json test_full/machine.json
 `test_full` performs a complete mini-loop: exploration, VASP labeling, MACE fine-tuning,
 and final model export.
 
+`test_representative` is a more meaningful BaFeF4 active-learning demo. It uses multiple
+seed structures and temperatures so the selection plot is informative:
+
+```bash
+bash scripts/run_mace_al.sh --root test_representative init-representative-demo
+bash scripts/run_mace_al.sh run test_representative/param.json test_representative/machine.json
+```
+
+By default it stops after VASP input preparation to avoid expensive DFT jobs. Set
+`submit_dft=true` or `run_dft_direct=true` if you want to label those structures.

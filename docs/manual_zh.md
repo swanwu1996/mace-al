@@ -184,7 +184,21 @@ final_models/
 
 `manifest.json` 会记录最终 generation 和导出的模型文件。
 
-## 9. 测试
+## 9. 自动绘图
+
+MACE-AL 会自动生成诊断图：
+
+- `cache/Generation-N/select/selection_map.png`：committee 不确定性分布图，被选中的结构会高亮。
+- `cache/Generation-N/mace/committee/training_metrics.png`：MACE 训练日志中的能量/力验证误差。
+- `cache/plots/generation_summary.png`：每轮候选结构数、选中结构数、DFT 标记结构数。
+
+可以随时重新生成图：
+
+```bash
+bash scripts/run_mace_al.sh run-report param.json machine.json -v
+```
+
+## 10. 测试和代表性示例
 
 仓库包含三个小测试配置：
 
@@ -196,3 +210,13 @@ bash scripts/run_mace_al.sh run test_full/param.json test_full/machine.json
 
 其中 `test_full` 会完成一个最小闭环：探索、VASP 标记、MACE 微调、导出最终模型。
 
+`test_representative` 是更有代表性的 BaFeF4 主动学习示例。它包含多个 seed 结构和多个温度，
+因此 selection 图更能反映主动学习筛点行为：
+
+```bash
+bash scripts/run_mace_al.sh --root test_representative init-representative-demo
+bash scripts/run_mace_al.sh run test_representative/param.json test_representative/machine.json
+```
+
+默认配置停在 VASP 输入准备后，避免直接启动较重的 DFT。需要标记时，把 `submit_dft=true`
+或 `run_dft_direct=true` 打开。

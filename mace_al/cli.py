@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 from .config import default_config, default_machine, load_config, load_run_config, write_yaml
-from .demo import init_demo
+from .demo import init_demo, init_representative_demo
 from .dft import collect_vasp, prepare_vasp, submit_vasp, wait_vasp
 from .explore import run_explore
 from .mace import foundation_models, init_committee_from_foundations, train_committee
@@ -27,6 +27,11 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("check")
     p = sub.add_parser("init-demo")
     p.add_argument("--source", default=None)
+    p = sub.add_parser("init-representative-demo")
+    p.add_argument("--source", default=None)
+    p.add_argument("--train-count", type=int, default=20)
+    p.add_argument("--test-count", type=int, default=5)
+    p.add_argument("--seed-count", type=int, default=8)
     p = sub.add_parser("report")
     p.add_argument("-v", "--verbose", action="store_true")
     p = sub.add_parser("init-committee")
@@ -107,6 +112,15 @@ def main() -> None:
         return
     if args.cmd == "init-demo":
         init_demo(root, args.source) if args.source else init_demo(root)
+        return
+    if args.cmd == "init-representative-demo":
+        init_representative_demo(
+            root,
+            args.source or "/home/qhwu/BaFeF4/9-mace/1-mace_tryrun/bafeF4_train_stage1.extxyz",
+            train_count=args.train_count,
+            test_count=args.test_count,
+            seed_count=args.seed_count,
+        )
         return
     if args.cmd == "run":
         cfg, run_root = load_run_config(args.param, args.machine)

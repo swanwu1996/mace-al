@@ -44,6 +44,7 @@ final_models/
 - Restartable generation state machine using `.done` markers.
 - Direct VASP execution or Slurm submission.
 - DP-GEN-like `run PARAM MACHINE` and `run-report PARAM MACHINE` CLI.
+- Automatic plots for selection maps, training metrics, and generation summaries.
 
 ## Package
 
@@ -58,3 +59,10 @@ On this cluster, the wrapper loads the MACE conda environment:
 bash scripts/run_mace_al.sh run param.json machine.json
 ```
 
+Representative BaFeF4 demo:
+
+```bash
+bash scripts/run_mace_al.sh --root test_representative init-representative-demo
+bash scripts/run_mace_al.sh run test_representative/param.json test_representative/machine.json
+bash scripts/run_mace_al.sh run-report test_representative/param.json test_representative/machine.json -v
+```

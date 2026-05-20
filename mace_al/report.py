@@ -4,6 +4,7 @@ from pathlib import Path
 
 from .io import read_atoms
 from .paths import Layout
+from .plotting import plot_all
 
 
 def report(cfg: dict, root: str | Path, verbose: bool = False) -> None:
@@ -30,4 +31,8 @@ def report(cfg: dict, root: str | Path, verbose: bool = False) -> None:
             for job in jobs:
                 status = "done" if (job / str(cfg["dft"]["done_file"])).exists() else "pending"
                 print(f"  {job.relative_to(root)} {status}")
-
+    outputs = plot_all(cfg, root)
+    if outputs:
+        print("plots")
+        for out in outputs:
+            print(f"  {out.relative_to(root)}")
