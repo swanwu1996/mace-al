@@ -1,6 +1,7 @@
 SYSTEM = mace_al_single_point
 ENCUT = 520
 EDIFF = 1E-6
+NELM = 160
 NSW = 0
 IBRION = -1
 ISMEAR = 0
@@ -10,4 +11,4 @@ LWAVE = .FALSE.
 LCHARG = .FALSE.
 PREC = Accurate
 ISIF = 2
-
+ALGO = All

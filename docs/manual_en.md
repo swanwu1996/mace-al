@@ -201,27 +201,13 @@ bash scripts/run_mace_al.sh run-report param.json machine.json -v
 
 ## 10. Smoke and Representative Tests
 
-Small development tests are included:
+Two development examples are included:
 
 ```bash
 bash scripts/run_mace_al.sh run test_smoke/param.json test_smoke/machine.json
-bash scripts/run_mace_al.sh run test_vasp/param.json test_vasp/machine.json
-bash scripts/run_mace_al.sh run test_full/param.json test_full/machine.json
 ```
 
-`test_full` performs a complete mini-loop: exploration, VASP labeling, MACE fine-tuning,
-and final model export.
-
-`test_representative` is a more meaningful BaFeF4 active-learning demo. It uses multiple
-seed structures and temperatures so the selection plot is informative:
-
-```bash
-bash scripts/run_mace_al.sh --root test_representative init-representative-demo
-bash scripts/run_mace_al.sh run test_representative/param.json test_representative/machine.json
-```
-
-By default it stops after VASP input preparation to avoid expensive DFT jobs. Set
-`submit_dft=true` or `run_dft_direct=true` if you want to label those structures.
+`test_smoke` is a fast workflow smoke test and stops after VASP input preparation.
 
 `test_representative_full` is the full local BaFeF4 loop used to validate the workflow:
 
@@ -233,3 +219,7 @@ bash scripts/run_mace_al.sh run-report test_representative_full/param.json test_
 
 It performs MACE/CUDA exploration, direct VASP labeling, label collection, next-generation
 MACE fine-tuning, plot generation, and final model export.
+
+MACE-AL checks VASP electronic convergence before collecting labels. Jobs with
+`EDIFF was not reached` or `electronic self-consistency was not achieved` are
+written to `failed_jobs.txt` and skipped.

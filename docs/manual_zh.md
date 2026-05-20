@@ -200,26 +200,13 @@ bash scripts/run_mace_al.sh run-report param.json machine.json -v
 
 ## 10. 测试和代表性示例
 
-仓库包含三个小测试配置：
+仓库保留两个示例配置：
 
 ```bash
 bash scripts/run_mace_al.sh run test_smoke/param.json test_smoke/machine.json
-bash scripts/run_mace_al.sh run test_vasp/param.json test_vasp/machine.json
-bash scripts/run_mace_al.sh run test_full/param.json test_full/machine.json
 ```
 
-其中 `test_full` 会完成一个最小闭环：探索、VASP 标记、MACE 微调、导出最终模型。
-
-`test_representative` 是更有代表性的 BaFeF4 主动学习示例。它包含多个 seed 结构和多个温度，
-因此 selection 图更能反映主动学习筛点行为：
-
-```bash
-bash scripts/run_mace_al.sh --root test_representative init-representative-demo
-bash scripts/run_mace_al.sh run test_representative/param.json test_representative/machine.json
-```
-
-默认配置停在 VASP 输入准备后，避免直接启动较重的 DFT。需要标记时，把 `submit_dft=true`
-或 `run_dft_direct=true` 打开。
+`test_smoke` 是快速冒烟测试，默认停在 VASP 输入准备后。
 
 `test_representative_full` 是已经用于验证工作流的完整 BaFeF4 本地闭环：
 
@@ -231,3 +218,7 @@ bash scripts/run_mace_al.sh run-report test_representative_full/param.json test_
 
 它会完整执行 MACE/CUDA 探索、直接运行 VASP 标记、收集标签、训练下一代 MACE、
 生成图像并导出最终模型。
+
+MACE-AL 会在收集标签前检查 VASP 电子自洽是否收敛。出现 `EDIFF was not reached`
+或 `electronic self-consistency was not achieved` 的作业会写入 `failed_jobs.txt`，
+不会进入训练集。

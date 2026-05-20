@@ -1,7 +1,7 @@
 SYSTEM = mace_al_bafeF4_full
 ENCUT = 360
-EDIFF = 1E-4
-NELM = 40
+EDIFF = 1E-5
+NELM = 160
 NSW = 0
 IBRION = -1
 ISMEAR = 0
@@ -9,5 +9,4 @@ SIGMA = 0.05
 LWAVE = .FALSE.
 LCHARG = .FALSE.
 PREC = Normal
-ALGO = Fast
-
+ALGO = All

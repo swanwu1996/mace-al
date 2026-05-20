@@ -84,6 +84,29 @@ def submit_vasp(cfg: dict, layout: Layout) -> None:
         marker.write_text(time.strftime("%Y-%m-%d %H:%M:%S") + "\n", encoding="utf-8")
 
 
+def vasp_converged(job_dir: Path) -> tuple[bool, str]:
+    outcar = job_dir / "OUTCAR"
+    vasp_out = job_dir / "vasp.out"
+    text = ""
+    for path in [outcar, vasp_out]:
+        if path.exists():
+            text += path.read_text(encoding="utf-8", errors="ignore") + "\n"
+
+    bad_markers = [
+        "EDIFF was not reached",
+        "aborting loop EDIFF was not reached",
+        "electronic self-consistency was not achieved",
+        "reached NELM",
+    ]
+    lower = text.lower()
+    for marker in bad_markers:
+        if marker.lower() in lower:
+            return False, marker
+    if not outcar.exists():
+        return False, "missing OUTCAR"
+    return True, "ok"
+
+
 def run_vasp_direct(cfg: dict, layout: Layout) -> None:
     dft_cfg = cfg["dft"]
     command = dft_cfg.get("direct_command")
@@ -115,8 +138,14 @@ def collect_vasp(cfg: dict, layout: Layout) -> Path:
     labeled = []
     force_limit = cfg["dft"].get("force_limit")
     removed = []
+    failed = []
     for job_dir in sorted(p for p in layout.stage("dft").glob("cand_*") if p.is_dir()):
         try:
+            ok, reason = vasp_converged(job_dir)
+            if not ok:
+                failed.append((job_dir, reason))
+                print(f"Skip unconverged VASP job {job_dir}: {reason}", flush=True)
+                continue
             if (job_dir / "vasprun.xml").exists():
                 atoms = read(str(job_dir / "vasprun.xml"), index=-1)
             elif (job_dir / "OUTCAR").exists():
@@ -141,5 +170,11 @@ def collect_vasp(cfg: dict, layout: Layout) -> Path:
     write_atoms(out, labeled)
     if removed:
         write_atoms(layout.stage("dft") / "removed_by_force.xyz", removed)
+    if failed:
+        failed_file = layout.stage("dft") / "failed_jobs.txt"
+        failed_file.write_text(
+            "".join(f"{job.relative_to(layout.root)}\t{reason}\n" for job, reason in failed),
+            encoding="utf-8",
+        )
     append_atoms(layout.rel(cfg["project"]["train_file"]), labeled)
     return out

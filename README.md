@@ -59,18 +59,14 @@ On this cluster, the wrapper loads the MACE conda environment:
 bash scripts/run_mace_al.sh run param.json machine.json
 ```
 
-Representative BaFeF4 demo:
-
-```bash
-bash scripts/run_mace_al.sh --root test_representative init-representative-demo
-bash scripts/run_mace_al.sh run test_representative/param.json test_representative/machine.json
-bash scripts/run_mace_al.sh run-report test_representative/param.json test_representative/machine.json -v
-```
-
-Full representative BaFeF4 loop with direct VASP and next-generation model export:
+Representative BaFeF4 full loop with direct VASP and next-generation model export:
 
 ```bash
 bash scripts/run_mace_al.sh --root test_representative_full init-representative-demo --train-count 20 --test-count 4 --seed-count 2
 bash scripts/run_mace_al.sh run test_representative_full/param.json test_representative_full/machine.json
 bash scripts/run_mace_al.sh run-report test_representative_full/param.json test_representative_full/machine.json -v
 ```
+
+MACE-AL checks VASP electronic convergence before collecting labels. Jobs with
+messages such as `EDIFF was not reached` or `electronic self-consistency was not
+achieved` are written to `failed_jobs.txt` and skipped.
