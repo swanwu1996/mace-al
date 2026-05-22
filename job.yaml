@@ -56,10 +56,9 @@ dft:
     Ba: Ba_sv
     Fe: Fe
     F: F
-  use_genque: true
-  genque_choice: "2"
-  slurm_script: 2-vasp_gpu.sh
-  submit_command: sbatch 2-vasp_gpu.sh
+  use_genque: false
+  submit_script: ./templates/vasp/submit_vasp.sh
+  submit_command: sbatch {submit_script}
   done_file: vasprun.xml
   poll_seconds: 300
   max_wait_seconds: 604800

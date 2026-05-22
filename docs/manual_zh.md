@@ -97,13 +97,18 @@ final_models/
   },
   "dft": {
     "potcar_root": "/home/qhwu/PBE64",
-    "use_genque": true,
-    "genque_choice": "2",
-    "submit_command": "sbatch 2-vasp_gpu.sh",
+    "use_genque": false,
+    "submit_script": "./templates/vasp/submit_vasp.sh",
+    "submit_command": "sbatch {submit_script}",
     "done_file": "vasprun.xml"
   }
 }
 ```
+
+推荐的队列模式是由用户自己提供 Slurm/PBS 提交脚本，并写到
+`dft.submit_script`。MACE-AL 会把这个脚本复制到每个候选结构目录，并用
+`{submit_script}` 填充 `dft.submit_command`。`genque` 只作为可选兼容路径，
+只有显式设置 `dft.use_genque: true` 时才会调用。
 
 如果做很小的本地测试，也可以直接在 bash 里跑 VASP：
 

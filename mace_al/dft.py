@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import shutil
+import shlex
 import subprocess
 import time
 from pathlib import Path
@@ -43,6 +44,32 @@ def write_potcar(job_dir: Path, atoms, dft_cfg: dict) -> None:
     (job_dir / "POTCAR.spec").write_text("".join(spec_lines), encoding="utf-8")
 
 
+def resolve_submit_script(dft_cfg: dict, root: Path, template_dir: Path) -> Path | None:
+    script = dft_cfg.get("submit_script") or dft_cfg.get("slurm_script")
+    if not script:
+        return None
+    script_path = Path(script)
+    candidates = []
+    if script_path.is_absolute():
+        candidates.append(script_path)
+    else:
+        candidates.extend([root / script_path, template_dir / script_path])
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def install_submit_script(job_dir: Path, script: Path | None) -> None:
+    if script is None:
+        return
+    dst = job_dir / script.name
+    if script.resolve() != dst.resolve():
+        shutil.copy2(script, dst)
+    mode = dst.stat().st_mode
+    dst.chmod(mode | 0o111)
+
+
 def prepare_vasp(cfg: dict, layout: Layout) -> Path:
     selected = read_atoms(layout.stage("select") / "selected.xyz")
     if not selected:
@@ -51,6 +78,12 @@ def prepare_vasp(cfg: dict, layout: Layout) -> Path:
     template_dir = layout.rel(dft_cfg["template_dir"])
     if not template_dir.exists():
         raise FileNotFoundError(f"Missing VASP template dir: {template_dir}")
+    submit_script = resolve_submit_script(dft_cfg, layout.root, template_dir)
+    if (dft_cfg.get("submit_script") or dft_cfg.get("slurm_script")) and submit_script is None:
+        raise FileNotFoundError(
+            "Missing DFT submit script. Set dft.submit_script to an existing file "
+            "or place the script in dft.template_dir."
+        )
 
     out_root = layout.stage("dft")
     for i, atoms in enumerate(selected):
@@ -61,7 +94,13 @@ def prepare_vasp(cfg: dict, layout: Layout) -> Path:
                 shutil.copy2(src, job_dir / src.name)
         write(str(job_dir / "POSCAR"), atoms, format="vasp", direct=True, vasp5=True)
         write_potcar(job_dir, atoms, dft_cfg)
+        install_submit_script(job_dir, submit_script)
         if dft_cfg.get("use_genque", False):
+            if shutil.which("genque") is None:
+                raise FileNotFoundError(
+                    "dft.use_genque is true, but the genque command is not available. "
+                    "Set use_genque=false and provide dft.submit_script instead."
+                )
             subprocess.run(
                 ["genque"],
                 cwd=job_dir,
@@ -73,14 +112,30 @@ def prepare_vasp(cfg: dict, layout: Layout) -> Path:
     return out_root
 
 
+def submit_command_for_job(dft_cfg: dict, job_dir: Path) -> str | list[str]:
+    command = dft_cfg.get("submit_command")
+    script = dft_cfg.get("submit_script") or dft_cfg.get("slurm_script")
+    script_name = Path(script).name if script else ""
+    if command:
+        if isinstance(command, list):
+            return [str(part).format(submit_script=script_name, job_dir=str(job_dir)) for part in command]
+        return str(command).format(submit_script=script_name, job_dir=str(job_dir))
+    if script_name:
+        return f"sbatch {shlex.quote(script_name)}"
+    raise ValueError("Set dft.submit_command or dft.submit_script before submitting VASP jobs")
+
+
 def submit_vasp(cfg: dict, layout: Layout) -> None:
     dft_cfg = cfg["dft"]
-    command = str(dft_cfg["submit_command"]).split()
     for job_dir in sorted(p for p in layout.stage("dft").glob("cand_*") if p.is_dir()):
         marker = job_dir / ".submitted"
         if marker.exists():
             continue
-        subprocess.run(command, cwd=job_dir, check=True)
+        command = submit_command_for_job(dft_cfg, job_dir)
+        if isinstance(command, list):
+            subprocess.run(command, cwd=job_dir, check=True)
+        else:
+            subprocess.run(command, cwd=job_dir, shell=True, executable="/bin/bash", check=True)
         marker.write_text(time.strftime("%Y-%m-%d %H:%M:%S") + "\n", encoding="utf-8")
 
 

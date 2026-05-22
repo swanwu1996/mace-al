@@ -8,10 +8,9 @@
   },
   "dft": {
     "potcar_root": "/home/qhwu/PBE64",
-    "use_genque": true,
-    "genque_choice": "2",
-    "slurm_script": "2-vasp_gpu.sh",
-    "submit_command": "sbatch 2-vasp_gpu.sh",
+    "use_genque": false,
+    "submit_script": "../templates/vasp/submit_vasp.sh",
+    "submit_command": "sbatch {submit_script}",
     "done_file": "vasprun.xml",
     "poll_seconds": 5,
     "max_wait_seconds": 60

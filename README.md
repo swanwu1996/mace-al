@@ -41,6 +41,7 @@ final_models/
 - Committee uncertainty selection with lower/upper trust levels.
 - ASE-based MD exploration.
 - VASP labeling with automatic POTCAR assembly from a local pseudopotential tree.
+- Queue submission through a user-provided submit script; `genque` is optional.
 - Restartable generation state machine using `.done` markers.
 - Direct VASP execution or Slurm submission.
 - DP-GEN-like `run PARAM MACHINE` and `run-report PARAM MACHINE` CLI.

@@ -98,13 +98,18 @@ Example:
   },
   "dft": {
     "potcar_root": "/home/qhwu/PBE64",
-    "use_genque": true,
-    "genque_choice": "2",
-    "submit_command": "sbatch 2-vasp_gpu.sh",
+    "use_genque": false,
+    "submit_script": "./templates/vasp/submit_vasp.sh",
+    "submit_command": "sbatch {submit_script}",
     "done_file": "vasprun.xml"
   }
 }
 ```
+
+The recommended queue mode is to provide your own Slurm/PBS submission script in
+`dft.submit_script`. MACE-AL copies that script into every candidate directory
+and formats `dft.submit_command` with `{submit_script}`. `genque` is optional and
+is only used when `dft.use_genque` is explicitly set to `true`.
 
 For a tiny local smoke test, direct VASP execution is supported:
 
