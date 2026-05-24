@@ -50,6 +50,7 @@ training evidence stays under `cache/Generation-N/`.
 - Direct VASP execution or Slurm submission.
 - DP-GEN-like `run PARAM MACHINE` and `run-report PARAM MACHINE` CLI.
 - Automatic plots for selection maps, training metrics, and generation summaries.
+- Centralized per-generation exploration/selection plots in `cache/plots/`.
 - Per-generation labeled-data traces rebuilt from `data/train.extxyz` as
   `cache/Generation-N/recovered_labels.extxyz`.
 

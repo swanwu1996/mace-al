@@ -19,6 +19,58 @@ def _plt():
     return plt
 
 
+def central_plot_path(layout: Layout, name: str) -> Path:
+    out_dir = layout.work_path / "plots"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    return out_dir / f"generation_{layout.generation:04d}_{name}.png"
+
+
+def plot_exploration(layout: Layout) -> Path | None:
+    explore_dir = layout.stage_path("explore")
+    csv_path = explore_dir / "uncertainty.csv"
+    if not csv_path.exists():
+        return None
+
+    rows = []
+    with csv_path.open("r", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            rows.append(row)
+    if not rows:
+        return None
+
+    step = np.array([float(r["step"]) for r in rows])
+    force = np.array([float(r["max_force_std"]) for r in rows])
+    mean_force = np.array([float(r["mean_force_std"]) for r in rows])
+    energy = np.array([float(r["energy_std_per_atom"]) for r in rows])
+    selected = np.array([int(r["selected"]) for r in rows], dtype=bool)
+    temp = np.array([float(r["temp_K"]) for r in rows])
+
+    plt = _plt()
+    fig, axes = plt.subplots(1, 2, figsize=(11.0, 4.5), dpi=160)
+    sc = axes[0].scatter(step, force, c=temp, s=18, alpha=0.65, cmap="viridis")
+    if selected.any():
+        axes[0].scatter(step[selected], force[selected], facecolors="none", edgecolors="crimson", s=70, linewidths=1.4)
+    axes[0].set_xlabel("MD step")
+    axes[0].set_ylabel("max force committee std (eV/A)")
+    axes[0].set_title(f"Generation {layout.generation} exploration")
+    axes[0].grid(True, alpha=0.25)
+    axes[1].scatter(mean_force, energy, c=temp, s=18, alpha=0.65, cmap="viridis")
+    if selected.any():
+        axes[1].scatter(mean_force[selected], energy[selected], facecolors="none", edgecolors="crimson", s=70, linewidths=1.4)
+    axes[1].set_xlabel("mean force committee std (eV/A)")
+    axes[1].set_ylabel("energy committee std / atom (eV)")
+    axes[1].set_title("uncertainty phase space")
+    axes[1].grid(True, alpha=0.25)
+    cbar = fig.colorbar(sc, ax=axes, shrink=0.9)
+    cbar.set_label("temperature (K)")
+    out = explore_dir / "exploration_uncertainty.png"
+    central = central_plot_path(layout, "exploration_uncertainty")
+    fig.savefig(out, bbox_inches="tight")
+    fig.savefig(central, bbox_inches="tight")
+    plt.close(fig)
+    return central
+
+
 def plot_selection(layout: Layout) -> Path | None:
     explore_dir = layout.stage_path("explore")
     csv_path = explore_dir / "uncertainty.csv"
@@ -50,10 +102,12 @@ def plot_selection(layout: Layout) -> Path | None:
     cbar = fig.colorbar(sc, ax=ax)
     cbar.set_label("temperature (K)")
     out = layout.stage("select") / "selection_map.png"
+    central = central_plot_path(layout, "selection_map")
     fig.tight_layout()
     fig.savefig(out)
+    fig.savefig(central)
     plt.close(fig)
-    return out
+    return central
 
 
 def _read_metric_file(path: Path) -> list[dict]:
@@ -170,6 +224,9 @@ def plot_all(cfg: dict, root: str | Path) -> list[Path]:
         except Exception:
             continue
         layout = Layout.from_config(cfg, root=root, generation=gen)
+        explore = plot_exploration(layout)
+        if explore:
+            outputs.append(explore)
         sel = plot_selection(layout)
         if sel:
             outputs.append(sel)

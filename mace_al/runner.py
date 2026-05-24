@@ -10,7 +10,7 @@ from .explore import run_explore
 from .io import read_atoms
 from .mace import init_committee_from_foundations, train_committee
 from .paths import Layout
-from .plotting import plot_generation_summary, plot_selection, plot_training
+from .plotting import plot_exploration, plot_generation_summary, plot_selection, plot_training
 from .select import run_select
 
 
@@ -63,6 +63,7 @@ def run_automatic(cfg: dict, root: str | Path, start: int = 0, stop: int | None 
         if not is_done(layout, "explore"):
             stage_log(layout, "running ASE/MACE exploration")
             candidates = run_explore(cfg, layout)
+            plot_exploration(layout)
             mark_done(layout, "explore", {"candidates": len(read_atoms(candidates))})
 
         if not is_done(layout, "select"):

@@ -213,6 +213,8 @@ This stops after the Gen-20 committee is trained and exports the final models.
 
 MACE-AL automatically generates diagnostic plots:
 
+- `cache/plots/generation_XXXX_exploration_uncertainty.png`: centralized per-generation exploration uncertainty plot.
+- `cache/plots/generation_XXXX_selection_map.png`: centralized per-generation selection map.
 - `cache/Generation-N/select/selection_map.png`: committee uncertainty map; selected structures are highlighted.
 - `cache/Generation-N/mace/committee/training_metrics.png`: validation energy/force metrics from MACE training logs.
 - `cache/plots/generation_summary.png`: candidates, selected structures, and DFT labels by generation.

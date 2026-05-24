@@ -210,6 +210,8 @@ final_models/
 
 MACE-AL 会自动生成诊断图：
 
+- `cache/plots/generation_XXXX_exploration_uncertainty.png`：每代探索阶段的不确定性随 MD step 和相空间分布。
+- `cache/plots/generation_XXXX_selection_map.png`：每代集中保存的 select 图。
 - `cache/Generation-N/select/selection_map.png`：committee 不确定性分布图，被选中的结构会高亮。
 - `cache/Generation-N/mace/committee/training_metrics.png`：MACE 训练日志中的能量/力验证误差。
 - `cache/plots/generation_summary.png`：每轮候选结构数、选中结构数、DFT 标记结构数。
