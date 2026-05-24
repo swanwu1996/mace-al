@@ -8,7 +8,7 @@ from pathlib import Path
 from .dft import collect_vasp, prepare_vasp, run_vasp_direct, submit_vasp, wait_vasp
 from .explore import run_explore
 from .io import read_atoms
-from .mace import init_committee_from_foundations, train_committee
+from .mace import has_complete_committee, init_committee_from_foundations, train_committee
 from .paths import Layout
 from .plotting import plot_exploration, plot_generation_summary, plot_selection, plot_training
 from .select import run_select
@@ -37,8 +37,8 @@ def stage_log(layout: Layout, message: str) -> None:
     print(f"[Generation-{layout.generation}] {message}", flush=True)
 
 
-def has_committee(layout: Layout) -> bool:
-    return any((layout.stage_path("mace") / "committee").glob("*.model"))
+def has_committee(cfg: dict, layout: Layout) -> bool:
+    return has_complete_committee(cfg, layout)
 
 
 def run_automatic(cfg: dict, root: str | Path, start: int = 0, stop: int | None = None) -> None:
@@ -50,15 +50,19 @@ def run_automatic(cfg: dict, root: str | Path, start: int = 0, stop: int | None 
     for generation in range(start, max_generations):
         layout = Layout.from_config(cfg, root=root, generation=generation)
 
-        if generation == 0 and run_cfg.get("auto_init_committee", True) and not has_committee(layout):
+        if generation == 0 and run_cfg.get("auto_init_committee", True) and not has_committee(cfg, layout):
             stage_log(layout, "initializing committee from foundation models")
             init_committee_from_foundations(cfg, layout)
             mark_done(layout, "committee", {"mode": "foundation"})
 
-        if not has_committee(layout):
+        if not has_committee(cfg, layout):
             stage_log(layout, "training committee")
             train_committee(cfg, layout)
             mark_done(layout, "committee", {"mode": "finetune"})
+
+        stop_after_generation_train = cfg.get("run", {}).get("stop_after_generation_train")
+        if stop_after_generation_train is not None and generation >= int(stop_after_generation_train):
+            break
 
         if not is_done(layout, "explore"):
             stage_log(layout, "running ASE/MACE exploration")
@@ -107,7 +111,7 @@ def run_automatic(cfg: dict, root: str | Path, start: int = 0, stop: int | None 
 
             if cfg.get("run", {}).get("train_next_generation", True) and generation + 1 < max_generations:
                 next_layout = Layout.from_config(cfg, root=root, generation=generation + 1)
-                if not is_done(layout, "train_next") and not has_committee(next_layout):
+                if not is_done(layout, "train_next") and not has_committee(cfg, next_layout):
                     stage_log(layout, f"training Generation-{generation + 1} committee")
                     train_committee(cfg, next_layout)
                     plot_training(next_layout)
@@ -139,8 +143,7 @@ def export_final_models(cfg: dict, root: str | Path) -> Path:
             generation = int(path.name.split("-", 1)[1])
         except Exception:
             continue
-        committee = Layout.from_config(cfg, root=root, generation=generation).stage_path("mace") / "committee"
-        if any(committee.glob("*.model")):
+        if has_committee(cfg, Layout.from_config(cfg, root=root, generation=generation)):
             generations.append(generation)
     if not generations:
         return root / "final_models"

@@ -32,6 +32,21 @@ def init_committee_from_foundations(cfg: dict, layout: Layout, copy: bool = Fals
     return out_dir
 
 
+def expected_model_names(cfg: dict, layout: Layout) -> list[str]:
+    project = cfg["project"]
+    names = []
+    for foundation in foundation_models(cfg, layout):
+        foundation_tag = foundation.stem.replace(".", "_").replace("-", "_")
+        for seed in cfg["mace"]["seeds"]:
+            names.append(f"{project['name']}_g{layout.generation}_{foundation_tag}_s{seed}.model")
+    return names
+
+
+def has_complete_committee(cfg: dict, layout: Layout) -> bool:
+    committee = layout.stage_path("mace") / "committee"
+    return all((committee / name).exists() for name in expected_model_names(cfg, layout))
+
+
 def train_committee(cfg: dict, layout: Layout) -> Path:
     mace_cfg = cfg["mace"]
     project = cfg["project"]
@@ -50,6 +65,9 @@ def train_committee(cfg: dict, layout: Layout) -> Path:
         foundation_tag = foundation.stem.replace(".", "_").replace("-", "_")
         for seed in mace_cfg["seeds"]:
             name = f"{project['name']}_g{layout.generation}_{foundation_tag}_s{seed}"
+            if (out_dir / f"{name}.model").exists():
+                print(f"Skipping existing MACE model: {out_dir / f'{name}.model'}", flush=True)
+                continue
             cmd = [
                 "mace_run_train",
                 f"--name={name}",
