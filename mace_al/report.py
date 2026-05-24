@@ -20,9 +20,9 @@ def report(cfg: dict, root: str | Path, verbose: bool = False) -> None:
         except Exception:
             continue
         layout = Layout.from_config(cfg, root=root, generation=generation)
-        candidates = len(read_atoms(layout.stage("explore") / "candidates.xyz"))
-        selected = len(read_atoms(layout.stage("select") / "selected.xyz"))
-        dft_dir = layout.stage("dft")
+        candidates = len(read_atoms(layout.stage_path("explore") / "candidates.xyz"))
+        selected = len(read_atoms(layout.stage_path("select") / "selected.xyz"))
+        dft_dir = layout.stage_path("dft")
         jobs = sorted(p for p in dft_dir.glob("cand_*") if p.is_dir())
         labeled = len(read_atoms(dft_dir / "learn_calculated.xyz"))
         failed = len(jobs) - labeled

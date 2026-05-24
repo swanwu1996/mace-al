@@ -189,6 +189,23 @@ final_models/
 
 `manifest.json` 会记录最终 generation 和导出的模型文件。
 
+默认情况下，重新导出会清理 `final_models/` 里不属于当前 manifest 的旧 `.model`
+文件，避免生产环境误选旧代模型。这个行为不删除 `cache/Generation-N/`，旧代训练、
+探索和 DFT 目录应当作为训练痕迹保留。
+
+如果只想跑到某一代训练结束并导出模型，不想继续做该代的探索/DFT，可以设置：
+
+```json
+{
+  "run": {
+    "max_generations": 21,
+    "stop_after_generation_train": 20
+  }
+}
+```
+
+这会在 Gen-20 committee 训练完成后停止并导出模型。
+
 ## 9. 自动绘图
 
 MACE-AL 会自动生成诊断图：
@@ -203,7 +220,28 @@ MACE-AL 会自动生成诊断图：
 bash scripts/run_mace_al.sh run-report param.json machine.json -v
 ```
 
-## 10. 测试和代表性示例
+## 10. 训练痕迹
+
+每次收集 VASP 标签后，MACE-AL 会从累计训练集 `data/train.extxyz` 自动重建轻量
+训练痕迹：
+
+```text
+cache/Generation-N/recovered_labels.extxyz
+cache/recovered_generation_summary.tsv
+cache/recovered_generation_summary.json
+```
+
+这些文件记录每一代实际进入训练集的 DFT 标记结构。它们不能替代原始
+`OUTCAR`、`vasprun.xml`、探索轨迹和训练 checkpoint；生产项目仍应保留完整
+`cache/Generation-N/` 目录。
+
+如需手动重建：
+
+```bash
+bash scripts/run_mace_al.sh rebuild-traces param.json machine.json
+```
+
+## 11. 测试和代表性示例
 
 仓库保留三个示例配置：
 

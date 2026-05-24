@@ -190,6 +190,25 @@ final_models/
 
 `manifest.json` records the final generation and exported files.
 
+By default, exporting removes stale `.model` files in `final_models/` that are
+not listed in the current manifest. This prevents production runs from
+accidentally picking an old generation. It does not delete `cache/Generation-N/`;
+those directories should be kept as training provenance.
+
+To stop immediately after a target generation has been trained, without running
+that generation's exploration/DFT step, set:
+
+```json
+{
+  "run": {
+    "max_generations": 21,
+    "stop_after_generation_train": 20
+  }
+}
+```
+
+This stops after the Gen-20 committee is trained and exports the final models.
+
 ## 9. Plots
 
 MACE-AL automatically generates diagnostic plots:
@@ -204,7 +223,29 @@ You can regenerate plots at any time:
 bash scripts/run_mace_al.sh run-report param.json machine.json -v
 ```
 
-## 10. Smoke and Representative Tests
+## 10. Training Provenance
+
+After every VASP label-collection step, MACE-AL rebuilds a lightweight
+per-generation label trace from the cumulative `data/train.extxyz`:
+
+```text
+cache/Generation-N/recovered_labels.extxyz
+cache/recovered_generation_summary.tsv
+cache/recovered_generation_summary.json
+```
+
+These files record which DFT-labeled structures entered training in each
+generation. They do not replace raw `OUTCAR`, `vasprun.xml`, exploration
+trajectories, or training checkpoints; keep the full `cache/Generation-N/`
+directories for production provenance.
+
+Manual rebuild:
+
+```bash
+bash scripts/run_mace_al.sh rebuild-traces param.json machine.json
+```
+
+## 11. Smoke and Representative Tests
 
 Three development examples are included:
 

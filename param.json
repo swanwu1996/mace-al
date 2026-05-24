@@ -8,7 +8,6 @@
     "test_file": "./data/test.extxyz",
     "foundation_model": "/home/qhwu/mace_mod/mace-omat-0-medium.model",
     "foundation_models": [
-      "/home/qhwu/mace_mod/mace-mh-1.model",
       "/home/qhwu/mace_mod/mace-mpa-0-medium.model",
       "/home/qhwu/mace_mod/mace-omat-0-medium.model"
     ]
@@ -26,7 +25,9 @@
     "forces_weight": 10.0,
     "stress_weight": 1.0,
     "E0s": "average",
-    "default_dtype": "float64"
+    "default_dtype": "float64",
+    "gpus": [],
+    "parallel_workers": 1
   },
   "explore": {
     "model_glob": "cache/Generation-{generation}/mace/committee/*.model",
@@ -39,7 +40,9 @@
     "force_std_high": 0.35,
     "energy_std_per_atom_high": 0.02,
     "max_candidates": 200,
-    "min_frame_gap": 10
+    "min_frame_gap": 10,
+    "gpus": [],
+    "parallel_workers": 1
   },
   "select": {
     "max_selected": 50,
@@ -65,6 +68,8 @@
     "wait_dft": true,
     "train_next_generation": true,
     "stop_after_train_next": false,
-    "final_model_count": 4
+    "stop_after_generation_train": null,
+    "final_model_count": 4,
+    "clean_final_models": true
   }
 }

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import subprocess
 import shutil
 from pathlib import Path
@@ -40,6 +41,11 @@ def train_committee(cfg: dict, layout: Layout) -> Path:
     if not train_file.exists():
         raise FileNotFoundError(f"Missing train file: {train_file}")
     e0s = mace_cfg.get("E0s")
+    base_env = os.environ.copy()
+    gpus = [str(gpu) for gpu in mace_cfg.get("gpus", [])]
+    workers = int(mace_cfg.get("parallel_workers", len(gpus) if gpus else 1))
+    cuda_visible_devices = mace_cfg.get("cuda_visible_devices")
+    jobs = []
     for foundation in foundation_models(cfg, layout):
         foundation_tag = foundation.stem.replace(".", "_").replace("-", "_")
         for seed in mace_cfg["seeds"]:
@@ -73,5 +79,29 @@ def train_committee(cfg: dict, layout: Layout) -> Path:
             ]
             if e0s is not None:
                 cmd.insert(18, f"--E0s={e0s}")
-            subprocess.run(cmd, cwd=layout.root, check=True)
+            work_dir = out_dir / "work" / name
+            work_dir.mkdir(parents=True, exist_ok=True)
+            env = base_env.copy()
+            if gpus:
+                env["CUDA_VISIBLE_DEVICES"] = gpus[len(jobs) % len(gpus)]
+            elif cuda_visible_devices is not None:
+                env["CUDA_VISIBLE_DEVICES"] = str(cuda_visible_devices)
+            jobs.append((cmd, work_dir, env))
+
+    if workers > 1 and len(jobs) > 1:
+        running = []
+        for cmd, work_dir, env in jobs:
+            while len(running) >= workers:
+                proc, proc_cmd = running.pop(0)
+                ret = proc.wait()
+                if ret:
+                    raise subprocess.CalledProcessError(ret, proc_cmd)
+            running.append((subprocess.Popen(cmd, cwd=work_dir, env=env), cmd))
+        for proc, proc_cmd in running:
+            ret = proc.wait()
+            if ret:
+                raise subprocess.CalledProcessError(ret, proc_cmd)
+    else:
+        for cmd, work_dir, env in jobs:
+            subprocess.run(cmd, cwd=work_dir, env=env, check=True)
     return out_dir

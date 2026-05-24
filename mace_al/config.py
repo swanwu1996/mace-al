@@ -100,7 +100,6 @@ def default_config() -> dict[str, Any]:
             "test_file": "./data/test.extxyz",
             "foundation_model": "/home/qhwu/mace_mod/mace-omat-0-medium.model",
             "foundation_models": [
-                "/home/qhwu/mace_mod/mace-mh-1.model",
                 "/home/qhwu/mace_mod/mace-mpa-0-medium.model",
                 "/home/qhwu/mace_mod/mace-omat-0-medium.model",
             ],
@@ -121,6 +120,8 @@ def default_config() -> dict[str, Any]:
             "forces_weight": 10.0,
             "stress_weight": 1.0,
             "E0s": "average",
+            "gpus": [],
+            "parallel_workers": 1,
         },
         "explore": {
             "model_glob": "cache/Generation-{generation}/mace/committee/*.model",
@@ -135,6 +136,8 @@ def default_config() -> dict[str, Any]:
             "energy_std_per_atom_high": 0.02,
             "max_candidates": 200,
             "min_frame_gap": 10,
+            "gpus": [],
+            "parallel_workers": 1,
         },
         "select": {
             "max_selected": 50,
@@ -164,8 +167,10 @@ def default_config() -> dict[str, Any]:
             "wait_dft": True,
             "train_next_generation": True,
             "stop_after_train_next": False,
+            "stop_after_generation_train": None,
             "final_generation": "last",
             "final_model_count": 4,
+            "clean_final_models": True,
         },
     }
 

@@ -13,6 +13,7 @@ from .select import run_select
 from .workflow import run_loop
 from .report import report
 from .runner import export_final_models, run_automatic
+from .recovery import rebuild_generation_traces
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -55,6 +56,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("machine")
     p.add_argument("-v", "--verbose", action="store_true")
     p = sub.add_parser("export")
+    p.add_argument("param")
+    p.add_argument("machine")
+    p = sub.add_parser("rebuild-traces")
     p.add_argument("param")
     p.add_argument("machine")
     return parser
@@ -133,6 +137,11 @@ def main() -> None:
     if args.cmd == "export":
         cfg, run_root = load_run_config(args.param, args.machine)
         export_final_models(cfg, run_root)
+        return
+    if args.cmd == "rebuild-traces":
+        cfg, run_root = load_run_config(args.param, args.machine)
+        rows = rebuild_generation_traces(cfg, run_root)
+        print(f"rebuilt {sum(row['recovered_labeled_structures'] for row in rows)} labels across {len(rows)} generations")
         return
 
     cfg, layout = load_with_layout(args)

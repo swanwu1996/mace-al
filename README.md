@@ -35,6 +35,10 @@ Final usable models are exported to:
 final_models/
 ```
 
+`final_models/` is kept production-clean: by default the exporter removes stale
+`.model` files that are not listed in the current `manifest.json`. Historical
+training evidence stays under `cache/Generation-N/`.
+
 ## Features
 
 - Starts from one or more pretrained MACE foundation models.
@@ -46,6 +50,8 @@ final_models/
 - Direct VASP execution or Slurm submission.
 - DP-GEN-like `run PARAM MACHINE` and `run-report PARAM MACHINE` CLI.
 - Automatic plots for selection maps, training metrics, and generation summaries.
+- Per-generation labeled-data traces rebuilt from `data/train.extxyz` as
+  `cache/Generation-N/recovered_labels.extxyz`.
 
 ## Package
 

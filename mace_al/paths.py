@@ -23,8 +23,11 @@ class Layout:
     def gen_path(self) -> Path:
         return self.work_path / f"Generation-{self.generation}"
 
+    def stage_path(self, name: str) -> Path:
+        return self.gen_path / name
+
     def stage(self, name: str) -> Path:
-        path = self.gen_path / name
+        path = self.stage_path(name)
         path.mkdir(parents=True, exist_ok=True)
         return path
 
@@ -35,4 +38,3 @@ class Layout:
 
 def format_generation(value: str, generation: int) -> str:
     return value.format(generation=generation, iter=generation)
-

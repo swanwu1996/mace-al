@@ -20,7 +20,7 @@ def _plt():
 
 
 def plot_selection(layout: Layout) -> Path | None:
-    explore_dir = layout.stage("explore")
+    explore_dir = layout.stage_path("explore")
     csv_path = explore_dir / "uncertainty.csv"
     if not csv_path.exists():
         return None
@@ -71,7 +71,7 @@ def _read_metric_file(path: Path) -> list[dict]:
 
 
 def plot_training(layout: Layout) -> list[Path]:
-    results_dir = layout.stage("mace") / "committee" / "results"
+    results_dir = layout.stage_path("mace") / "committee" / "results"
     files = sorted(results_dir.glob("*_train.txt"))
     if not files:
         return []
@@ -130,9 +130,9 @@ def plot_generation_summary(cfg: dict, root: str | Path) -> Path | None:
             continue
         layout = Layout.from_config(cfg, root=root, generation=gen)
         generations.append(gen)
-        candidates.append(len(read_atoms(layout.stage("explore") / "candidates.xyz")))
-        selected.append(len(read_atoms(layout.stage("select") / "selected.xyz")))
-        labeled.append(len(read_atoms(layout.stage("dft") / "learn_calculated.xyz")))
+        candidates.append(len(read_atoms(layout.stage_path("explore") / "candidates.xyz")))
+        selected.append(len(read_atoms(layout.stage_path("select") / "selected.xyz")))
+        labeled.append(len(read_atoms(layout.stage_path("dft") / "learn_calculated.xyz")))
 
     if not generations:
         return None
@@ -178,4 +178,3 @@ def plot_all(cfg: dict, root: str | Path) -> list[Path]:
     if summary:
         outputs.append(summary)
     return outputs
-

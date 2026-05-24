@@ -38,7 +38,7 @@ def stage_log(layout: Layout, message: str) -> None:
 
 
 def has_committee(layout: Layout) -> bool:
-    return any((layout.stage("mace") / "committee").glob("*.model"))
+    return any((layout.stage_path("mace") / "committee").glob("*.model"))
 
 
 def run_automatic(cfg: dict, root: str | Path, start: int = 0, stop: int | None = None) -> None:
@@ -111,6 +111,9 @@ def run_automatic(cfg: dict, root: str | Path, start: int = 0, stop: int | None 
                     train_committee(cfg, next_layout)
                     plot_training(next_layout)
                     mark_done(layout, "train_next", {"next_generation": generation + 1})
+                stop_after_generation_train = cfg.get("run", {}).get("stop_after_generation_train")
+                if stop_after_generation_train is not None and generation + 1 >= int(stop_after_generation_train):
+                    break
                 if cfg.get("run", {}).get("stop_after_train_next", False):
                     break
         else:
@@ -129,21 +132,32 @@ def run_automatic(cfg: dict, root: str | Path, start: int = 0, stop: int | None 
 def export_final_models(cfg: dict, root: str | Path) -> Path:
     root = Path(root).resolve()
     work = root / cfg.get("work_path", "./cache")
-    generations = []
+    generations: list[int] = []
     for path in work.glob("Generation-*"):
         try:
-            generations.append(int(path.name.split("-", 1)[1]))
+            generation = int(path.name.split("-", 1)[1])
         except Exception:
             continue
+        committee = Layout.from_config(cfg, root=root, generation=generation).stage_path("mace") / "committee"
+        if any(committee.glob("*.model")):
+            generations.append(generation)
     if not generations:
         return root / "final_models"
 
-    final_generation = max(generations)
-    committee = Layout.from_config(cfg, root=root, generation=final_generation).stage("mace") / "committee"
+    final_setting = cfg.get("run", {}).get("final_generation", "last")
+    if isinstance(final_setting, int):
+        final_generation = final_setting
+        if final_generation not in generations:
+            raise FileNotFoundError(f"Generation-{final_generation} has no trained committee models")
+    else:
+        final_generation = max(generations)
+    committee = Layout.from_config(cfg, root=root, generation=final_generation).stage_path("mace") / "committee"
     all_models = sorted(committee.glob("*.model"))
     preferred = [model for model in all_models if not model.name.endswith("_compiled.model")]
     compiled = [model for model in all_models if model.name.endswith("_compiled.model")]
     models = preferred or compiled
+    if not models:
+        raise FileNotFoundError(f"No model files found in {committee}")
     out = root / "final_models"
     out.mkdir(parents=True, exist_ok=True)
     count = int(cfg.get("run", {}).get("final_model_count", len(models)))
@@ -157,6 +171,13 @@ def export_final_models(cfg: dict, root: str | Path) -> Path:
         else:
             shutil.copy2(model, dst)
         exported.append(str(dst.relative_to(root)))
+
+    if cfg.get("run", {}).get("clean_final_models", True):
+        keep = {Path(path).name for path in exported}
+        keep.add("manifest.json")
+        for stale in out.glob("*.model"):
+            if stale.name not in keep:
+                stale.unlink()
 
     manifest = {
         "final_generation": final_generation,

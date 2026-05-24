@@ -11,6 +11,7 @@ from ase.io import read, write
 
 from .io import append_atoms, read_atoms, write_atoms
 from .paths import Layout
+from .recovery import rebuild_generation_traces
 
 
 def species_order(atoms) -> list[str]:
@@ -92,8 +93,10 @@ def prepare_vasp(cfg: dict, layout: Layout) -> Path:
         for src in template_dir.iterdir():
             if src.is_file() and src.name != "POSCAR":
                 shutil.copy2(src, job_dir / src.name)
-        write(str(job_dir / "POSCAR"), atoms, format="vasp", direct=True, vasp5=True)
-        write_potcar(job_dir, atoms, dft_cfg)
+        order = np.argsort(atoms.get_chemical_symbols())
+        ordered_atoms = atoms[order]
+        write(str(job_dir / "POSCAR"), ordered_atoms, format="vasp", direct=True, vasp5=True)
+        write_potcar(job_dir, ordered_atoms, dft_cfg)
         install_submit_script(job_dir, submit_script)
         if dft_cfg.get("use_genque", False):
             if shutil.which("genque") is None:
@@ -237,4 +240,5 @@ def collect_vasp(cfg: dict, layout: Layout) -> Path:
             encoding="utf-8",
         )
     append_atoms(layout.rel(cfg["project"]["train_file"]), labeled)
+    rebuild_generation_traces(cfg, layout.root)
     return out
